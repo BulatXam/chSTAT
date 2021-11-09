@@ -8,6 +8,12 @@ Session = sessionmaker(DB_ENGINE)
 session = Session()
 
 
+async def getAuthor(id) -> Author:
+    author = session.query(Author).get(id)
+
+    return author
+
+
 async def getOrCreateAuthor(id, first_name, last_name, username) -> Author:
     author = session.query(Author).get(id)
     if author:
