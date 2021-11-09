@@ -1,6 +1,7 @@
 from aiogram.types import Message
 
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
 
 from aiogram.utils.exceptions import ChatNotFound, BadRequest
 
@@ -14,12 +15,23 @@ from bot import dp, bot
 @dp.message_handler(text=["Добавить канал"])
 async def add_channel(message: Message):
     await ChannelLinkForm.link.set()
-    print("hi")
     await message.reply(
         reply=False,
         text="Добавьте нашего бота в ваш телеграм канал с правами админа."
              "Как только добавили-отправьте ссылку на ваш канал сообщением."
+             "(/cancel для отмены)"
     )
+
+
+@dp.message_handler(state='*', commands='cancel')
+@dp.message_handler(Text(equals='отмена', ignore_case=True), state='*')
+async def cancel_handler(message: Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+
+    await state.finish()
+    await message.reply('Отмена.')
 
 
 @dp.message_handler(state=ChannelLinkForm.link)
