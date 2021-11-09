@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker
-from models import Channel, Author
+from db.models import Channel, Author
 
 from config import DB_ENGINE
 
@@ -36,7 +36,7 @@ async def createAuthor(id, first_name, last_name, username) -> Author:
 
 
 async def createChannel(id, author_id, title, username, description,
-                         invite_link, linked_chat_id) -> Channel:
+                        invite_link, linked_chat_id) -> Channel:
     if not session.query(Channel).get(id):
         channel = Channel(id=id,
                           author_id=author_id,

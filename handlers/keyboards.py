@@ -8,4 +8,3 @@ info_channel_key = KeyboardButton("Мои каналы")
 
 start_keyboard.row(add_channel_key)
 start_keyboard.row(help_key, info_channel_key)
-
