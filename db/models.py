@@ -5,7 +5,11 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from datetime import datetime
 
-import config
+import asyncio
+
+from bot import bot
+
+from loguru import logger
 
 Base = declarative_base()
 
@@ -73,15 +77,32 @@ class Post(TimedBaseModel):
     __tablename__ = "post"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    channel_id = Column(Integer, ForeignKey("channel.id"))
 
     text = Column(String, nullable=True)
     right_time = Column(DateTime(True))
 
     medias = relationship("PostMedia", backref="postMedias")
 
-    def __init__(self, text, right_time):
+    def __init__(self, channel_id, text, right_time):
+        self.channel_id = channel_id
         self.text = text
         self.right_time = right_time
+
+    def get_remaining_time(self):
+        return self.right_time - datetime.now()
+
+    async def sleep_before_right_time(self):
+        total_seconds = self.get_remaining_time().total_seconds()
+        logger.info(f"The task fell asleep for {total_seconds} seconds")
+        await asyncio.sleep(total_seconds)
+
+    async def send_post(self):
+        logger.info(f"Send Post<{self.id}> in Channel<{self.channel_id}>")
+        await bot.send_message(
+            chat_id=self.channel_id,
+            text=self.text
+        )
 
 
 class PostMedia(BaseModel):

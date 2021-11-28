@@ -16,11 +16,25 @@ Session = sessionmaker(DB_ENGINE)
 session = Session()
 
 
+async def getPosts(text=None, right_time=None,
+                   chat_id_for_sending=None):
+    posts = session.query(Post).filter_by(
+        text=text,
+        right_times=right_time,
+        chat_ids_for_sendings=chat_id_for_sending,
+    )
+
+    return posts
+
+
 async def createPost(text: str,
                      files: list[types.Audio, types.PhotoSize, types.Video,
                                  types.Voice],
-                     right_time: datetime) -> Post:
-    post = Post(text=text, right_time=right_time)
+                     right_time: datetime,
+                     channel_id: str or int) -> Post:
+    post = Post(text=text,
+                right_time=right_time,
+                channel_id=channel_id)
 
     for file in files:
         media_file = PostMedia(post_id=post.id, file_id=file.file_id,
