@@ -11,6 +11,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.utils.exceptions import ChatNotFound, BadRequest
 
 from handlers.utils.forms.channel_link_form import ChannelLinkForm
+from handlers.utils.keyboards import get_channel
 
 from db import crud
 
@@ -35,9 +36,9 @@ async def get_channels(message: Message):
     logger.info(f"User<{message.from_user.id}> get his channels")
 
 
-@dp.callback_query_handler(Text(startswith="get_channel_info"))
-async def callbacks_num(call: CallbackQuery):
-    channel_id = call.data.split(":")[1]
+@dp.callback_query_handler(get_channel.filter())
+async def get_channel(call: CallbackQuery, callback_data: dict[str, str]):
+    channel_id = callback_data["channel_id"]
 
     channel = await crud.getChannel(id=channel_id)
 

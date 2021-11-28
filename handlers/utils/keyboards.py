@@ -1,12 +1,17 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
     InlineKeyboardMarkup, InlineKeyboardButton
 
-from db.models_dev.channel import Channel
+from db.models import Channel
 
-# callback_data состовляется так:
-# (временное решение)
-# pk-перманентный ключ, то есть идентификатор id
-# {create/read/..}_{channel/post/..}_{stats/info/..}:{pk}_{arg2}_{arg3}_{arg4}..
+from aiogram.utils.callback_data import CallbackData
+
+# Callbacks
+
+get_channel = CallbackData("get_channel", "channel_id")
+get_my_channels = CallbackData("get_my_channels", "author_id")
+
+create_post = CallbackData("create_post", "channel_id")
+get_channel_posts = CallbackData("get_channels_posts", "channel_id")
 
 ################################################################################
 
@@ -32,14 +37,14 @@ def get_channel_func_keyboard(channel: Channel):
 
     channel_stats_key = InlineKeyboardButton(
         "Статистика канала",
-        callback_data=f"get_channel_stats:{channel.id}")
+        callback_data=get_channel.new(channel_id=channel.id))
     create_post_key = InlineKeyboardButton(
         "Добавить пост",
-        callback_data=f"create_post:{channel.id}"
+        callback_data=create_post.new(channel_id=channel.id)
     )
     my_post_key = InlineKeyboardButton(
         "Мои посты",
-        callback_data=f"get_allposts_info:{channel.id}"
+        callback_data=get_channel_posts.new(channel_id=channel.id)
     )
 
     channel_functions_keyboard.row(channel_stats_key)
@@ -60,7 +65,8 @@ def get_channels_keyboard(channels: list[Channel]):
     for channel in channels:
         channel_key = InlineKeyboardButton(
             text=f"{channel.title}",
-            callback_data=f"get_channel_info:{channel.id}")
+            callback_data=get_channel.new(channel_id=channel.id),
+        )
         channels_keyboard.add(channel_key)
 
     return channels_keyboard
