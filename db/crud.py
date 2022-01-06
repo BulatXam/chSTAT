@@ -16,12 +16,27 @@ Session = sessionmaker(DB_ENGINE)
 session = Session()
 
 
-async def getPosts(text=None, right_time=None,
-                   chat_id_for_sending=None):
+async def deletePost(id):
+    post: Post = session.query(Post).get(id)
+
+    session.delete(post)
+    session.commit()
+    return post
+
+
+async def getPost(id):
+    post: Post = session.query(Post).get(id)
+
+    return post
+
+
+async def getPosts(text=None,
+                   right_time=None,
+                   channel_id=None):
     posts = session.query(Post).filter_by(
         text=text,
-        right_times=right_time,
-        chat_ids_for_sendings=chat_id_for_sending,
+        right_time=right_time,
+        channel_id=channel_id,
     )
 
     return posts
@@ -44,6 +59,10 @@ async def createPost(text: str,
         post.medias.append(media_file)
 
     session.add(post)
+
+    channel = session.query(Channel).get(channel_id)
+    channel.posts.append(post)
+
     session.commit()
 
     return post
@@ -77,6 +96,7 @@ async def getOrCreateAuthor(id, first_name, last_name, username) -> Author:
         session.commit()
 
         return author
+
 
 
 async def createAuthor(id, first_name, last_name, username) -> Author:
